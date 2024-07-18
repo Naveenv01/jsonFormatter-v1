@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Editor from './editor';
 import FormattedView from './formatterdView';
 import Sidebar from './sidebar';
@@ -13,37 +13,72 @@ interface Tab {
 
 const JSONFormatter: React.FC = () => {
     const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
-    const [tabs, setTabs] = useState<Tab[]>([
-        { id: 1, name: 'Tab 1', content: '', formattedJSON: '', jsonError: '' }
-    ]);
+    const [tabs, setTabs] = useState<Tab[]>([]);
     const [activeTab, setActiveTab] = useState<number>(1);
+
+    // Load data from localStorage on component mount
+    useEffect(() => {
+
+        const storedTabs = localStorage.getItem('jsonFormatterTabs');
+        const storedActiveTab = localStorage.getItem('jsonFormatterActiveTab');
+
+        if (storedTabs) {
+            const parsedTabs = JSON.parse(storedTabs);
+
+            setTabs(parsedTabs);
+
+            if (storedActiveTab) {
+                const activeTabId = parseInt(storedActiveTab, 10);
+                if (parsedTabs.some((tab: Tab) => tab.id === activeTabId)) {
+                    setActiveTab(activeTabId);
+                } else if (parsedTabs.length > 0) {
+                    setActiveTab(parsedTabs[0].id);
+                }
+            }
+        } else {
+            const defaultTab = { id: 1, name: 'Tab 1', content: '', formattedJSON: '', jsonError: '' };
+            setTabs([defaultTab]);
+            setActiveTab(1);
+            saveToLocalStorage([defaultTab], 1);
+        }
+    }, []);
+
+    const saveToLocalStorage = useCallback((tabsToSave: Tab[], activeTabToSave: number) => {
+        localStorage.setItem('jsonFormatterTabs', JSON.stringify(tabsToSave));
+        localStorage.setItem('jsonFormatterActiveTab', activeTabToSave.toString());
+    }, []);
 
     const toggleSidebar = (): void => setSidebarOpen(!sidebarOpen);
 
     const addTab = (): void => {
         const newTab: Tab = {
-            id: tabs.length + 1,
+            id: tabs.length > 0 ? Math.max(...tabs.map(t => t.id)) + 1 : 1,
             name: `Tab ${tabs.length + 1}`,
             content: '',
             formattedJSON: '',
             jsonError: ''
         };
-        setTabs([...tabs, newTab]);
+        const newTabs = [...tabs, newTab];
+        setTabs(newTabs);
         setActiveTab(newTab.id);
+        saveToLocalStorage(newTabs, newTab.id);
     };
 
     const removeTab = (id: number): void => {
-        setTabs(tabs.filter(tab => tab.id !== id));
-        if (activeTab === id) {
-            setActiveTab(tabs[0].id);
-        }
-    };
-
-    const handleContentChange = (content: string): void => {
-        const updatedTabs = tabs.map(tab =>
-            tab.id === activeTab ? { ...tab, content, ...formatJSON(content) } : tab
-        );
+        const updatedTabs = tabs.filter(tab => tab.id !== id);
         setTabs(updatedTabs);
+        let newActiveTab = activeTab;
+        if (activeTab === id) {
+            newActiveTab = updatedTabs.length > 0 ? updatedTabs[0].id : 0;
+            setActiveTab(newActiveTab);
+        }
+        if (updatedTabs.length === 0) {
+            const newTab = { id: 1, name: 'Tab 1', content: '', formattedJSON: '', jsonError: '' };
+            setTabs([newTab]);
+            newActiveTab = 1;
+            setActiveTab(newActiveTab);
+        }
+        saveToLocalStorage(updatedTabs.length > 0 ? updatedTabs : [{ id: 1, name: 'Tab 1', content: '', formattedJSON: '', jsonError: '' }], newActiveTab);
     };
 
     const formatJSON = (content: string): { formattedJSON: string; jsonError: string } => {
@@ -55,11 +90,22 @@ const JSONFormatter: React.FC = () => {
         }
     };
 
+    const handleContentChange = (content: string): void => {
+
+        const updatedTabs = tabs.map(tab =>
+            tab.id === activeTab ? { ...tab, content, ...formatJSON(content) } : tab
+        );
+        setTabs(updatedTabs);
+        saveToLocalStorage(updatedTabs, activeTab);
+    };
+
     const clearActiveTab = (): void => {
+
         const updatedTabs = tabs.map(tab =>
             tab.id === activeTab ? { ...tab, content: '', formattedJSON: '', jsonError: '' } : tab
         );
         setTabs(updatedTabs);
+        saveToLocalStorage(updatedTabs, activeTab);
     };
 
     const formatActiveTab = (): void => {
@@ -70,10 +116,15 @@ const JSONFormatter: React.FC = () => {
                 tab.id === activeTab ? { ...tab, content: formattedJSON, formattedJSON, jsonError } : tab
             );
             setTabs(updatedTabs);
+            saveToLocalStorage(updatedTabs, activeTab);
         }
     };
 
-    const activeTabData = tabs.find(tab => tab.id === activeTab) || tabs[0];
+    const activeTabData = tabs.find(tab => tab.id === activeTab) || tabs[0] || { content: '', formattedJSON: '', jsonError: '' };
+
+    useEffect(() => {
+
+    }, [tabs, activeTab]);
 
     return (
         <div className="flex h-screen bg-gray-100 overflow-hidden">
@@ -82,7 +133,10 @@ const JSONFormatter: React.FC = () => {
                 toggleSidebar={toggleSidebar}
                 tabs={tabs}
                 activeTab={activeTab}
-                setActiveTab={setActiveTab}
+                setActiveTab={(id) => {
+                    setActiveTab(id);
+                    saveToLocalStorage(tabs, id);
+                }}
                 addTab={addTab}
                 removeTab={removeTab}
             />

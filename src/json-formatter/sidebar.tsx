@@ -42,8 +42,10 @@ const Sidebar: React.FC<SidebarProps> = ({
           <span>{tab.name}</span>
           <button
             onClick={(e) => {
-              e.stopPropagation();
-              removeTab(tab.id);
+              if (tab.id != 1) {
+                e.stopPropagation();
+                removeTab(tab.id);
+              }
             }}
             className="p-1 hover:bg-gray-600 rounded"
           >
