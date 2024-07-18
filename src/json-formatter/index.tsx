@@ -67,7 +67,7 @@ const JSONFormatter: React.FC = () => {
         if (activeTabData) {
             const { formattedJSON, jsonError } = formatJSON(activeTabData.content);
             const updatedTabs = tabs.map(tab =>
-                tab.id === activeTab ? { ...tab, formattedJSON, jsonError } : tab
+                tab.id === activeTab ? { ...tab, content: formattedJSON, formattedJSON, jsonError } : tab
             );
             setTabs(updatedTabs);
         }
@@ -111,6 +111,7 @@ const JSONFormatter: React.FC = () => {
                         content={activeTabData.content}
                         onChange={handleContentChange}
                         jsonError={activeTabData.jsonError}
+                        onFormat={formatActiveTab}
                     />
                     <FormattedView formattedJSON={activeTabData.formattedJSON} />
                 </div>

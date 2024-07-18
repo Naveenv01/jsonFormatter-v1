@@ -4,9 +4,10 @@ interface EditorProps {
     content: string;
     onChange: (content: string) => void;
     jsonError: string;
+    onFormat: () => void;  // New prop for format action
 }
 
-const Editor: React.FC<EditorProps> = ({ content, onChange, jsonError }) => {
+const Editor: React.FC<EditorProps> = ({ content, onChange, jsonError, onFormat }) => {
     const editorRef = useRef<HTMLTextAreaElement>(null);
 
     const handleContentChange = (e: ChangeEvent<HTMLTextAreaElement>): void => {
@@ -32,7 +33,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange, jsonError }) => {
             editorRef.current.style.height = `${editorRef.current.scrollHeight}px`;
         }
     }, [content]);
-
 
     return (
         <div className="w-1/2 pr-2 flex flex-col overflow-hidden">
