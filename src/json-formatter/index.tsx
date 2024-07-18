@@ -142,17 +142,17 @@ const JSONFormatter: React.FC = () => {
             />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <div className="bg-white shadow-md p-4">
-                    <div className='flex-1 flex flex-row overflow-hidden items-center justify-between'>
-                        <h1 className="text-2xl font-bold">JSON Formatter</h1>
+                    <div className='flex-1 flex flex-row overflow-hidden items-center'>
+                        <h1 className="text-2xl font-bold pr-10">JSON Formatter</h1>
                         <div>
                             <button
-                                className="text-xl font-bold px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 mr-2"
+                                className="px-4 py-2 text-blue-600 mr-2"
                                 onClick={formatActiveTab}
                             >
                                 Format
                             </button>
                             <button
-                                className="text-xl font-bold px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600"
+                                className="px-4 py-2 text-red-600"
                                 onClick={clearActiveTab}
                             >
                                 Clear

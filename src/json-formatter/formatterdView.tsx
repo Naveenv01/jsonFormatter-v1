@@ -11,7 +11,7 @@ const FormattedView: React.FC<FormattedViewProps> = ({ formattedJSON }) => {
 
     return (
         <div className="w-1/2 pl-2 bg-white rounded shadow overflow-hidden flex flex-col">
-            <h2 className="text-lg font-semibold mb-2 p-2">Formatted JSON:</h2>
+            <h2 className="text-lg font-semibold mb-2 p-2">JSON Preview </h2>
             <div className="p-2 font-mono text-sm flex-1 overflow-y-auto flex">
                 <div className="flex-1">
                     {formattedJSON ? (
